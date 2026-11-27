@@ -77,8 +77,8 @@ h2 em{font-style:normal;color:var(--red)}
 
 /* PROJECTS */
 .proj{border:1px solid var(--red);border-radius:10px;overflow:hidden;background:var(--cream);margin-bottom:32px}
-.slider{position:relative;background:var(--cream);width:100%;height:min(70vw,380px);overflow:hidden;display:grid;place-items:center;touch-action:pan-y}
-.slider img{display:none;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
+.slider{position:relative;background:var(--cream);width:100%;height:min(75vw,380px);overflow:hidden;touch-action:pan-y}
+.slider img{display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 .slider img.on{display:block}
 .arrow{position:absolute;top:50%;transform:translateY(-50%);width:34px;height:34px;border:0;border-radius:50%;background:rgba(0,0,0,.4);color:#fff;font-size:1.2rem;cursor:pointer}
 .arrow:hover{background:rgba(0,0,0,.65)}
@@ -94,7 +94,13 @@ h2 em{font-style:normal;color:var(--red)}
 .tags{display:flex;flex-wrap:wrap;gap:8px}
 .tags span{border:1px solid #f0b8bd;color:var(--red);background:#fff4f4;border-radius:3px;font-size:.68rem;font-weight:700;padding:3px 9px}
 video{background:#000;width:100%;max-height:min(60vh,360px);object-fit:contain;margin:0 auto}
-.vwrap{background:#000;max-width:100%}
+.vwrap{background:#000;position:relative}
+.vwrap video{display:none;width:100%;height:min(70vh,400px);max-height:none;object-fit:contain;background:#000}
+.vwrap video.on{display:block}
+.vwrap .arrow{top:45%}
+.vdots{display:flex;justify-content:center;gap:8px;padding:10px 0;background:#000}
+.vdots button{width:9px;height:9px;border-radius:50%;border:0;background:rgba(255,255,255,.45);cursor:pointer;padding:0}
+.vdots button.on{background:#fff}
 
 /* CONTACT */
 .contact{background:var(--red);color:#fff;border-radius:10px;padding:48px 36px;display:grid;grid-template-columns:1fr 1.1fr;gap:32px;align-items:center}
@@ -245,12 +251,9 @@ footer{max-width:var(--max);margin:-32px auto 0;background:var(--red-dark);color
       </article>
 
       <article class="proj">
-        <div class="vwrap">
-          <video controls playsinline preload="metadata" aria-label="Video event content creator">
-            <source src="EventContentCreater.mp4" type="video/mp4">
-            <source src="EventContentCreater2.mp4" type="video/mp4">
-            Browser kamu belum mendukung pemutar video.
-          </video>
+        <div class="vwrap" data-vslider>
+          <video controls playsinline preload="metadata" aria-label="Video event content creator 1" src="EventContentCreater.mp4">Browser kamu belum mendukung pemutar video.</video>
+          <video controls playsinline preload="metadata" aria-label="Video event content creator 2" src="EventContentCreater2.mp4">Browser kamu belum mendukung pemutar video.</video>
         </div>
         <div class="info">
           <div class="top"><h3>Event Content Creator</h3><span class="pn">PROJECT 3</span></div>
@@ -322,6 +325,29 @@ document.querySelectorAll('[data-slider]').forEach(function(box){
     if(Math.abs(dx) > 40) show(dx < 0 ? i+1 : i-1);
     startX = null;
   });
+  show(0);
+});
+
+
+/* Slider video: 2 slide, video lain otomatis berhenti */
+document.querySelectorAll('[data-vslider]').forEach(function(box){
+  var vids = box.querySelectorAll('video'), i = 0;
+  var prev = document.createElement('button'), next = document.createElement('button');
+  prev.className='arrow prev'; prev.textContent='‹'; prev.setAttribute('aria-label','Video sebelumnya');
+  next.className='arrow next'; next.textContent='›'; next.setAttribute('aria-label','Video berikutnya');
+  var dots = document.createElement('div'); dots.className='vdots';
+  var dotBtns = [].map.call(vids, function(_, n){
+    var d = document.createElement('button'); d.setAttribute('aria-label','Video ' + (n+1));
+    d.onclick = function(){ show(n); }; dots.appendChild(d); return d;
+  });
+  box.append(prev, next); box.parentNode.insertBefore(dots, box.nextSibling);
+  function show(n){
+    i = (n + vids.length) % vids.length;
+    vids.forEach(function(v,k){ v.pause(); v.classList.toggle('on', k === i); });
+    dotBtns.forEach(function(d,k){ d.classList.toggle('on', k === i); });
+  }
+  prev.onclick = function(){ show(i-1); };
+  next.onclick = function(){ show(i+1); };
   show(0);
 });
 
